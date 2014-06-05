@@ -10,20 +10,21 @@ var secrets = require('../secrets.js').secrets,
 
 exports.index = function(req, res) {
   // Get data from Celery
-  // getCelery(celery);
-  // Get data from Rush Order
-  getRushOrder(ro);
-  // Graph with Plotly
-  // Render the page
-  res.render('index', { title: 'Express' });
+  getCelery(celery, function (err, celeryData) {
+    // Get data from Rush Order
+    // getRushOrder(ro);
+    // Graph with Plotly
+    // Render the page
+    res.render('index', { title: 'Dashboard', celeryData: celeryData });
+  });
 };
 
-function getCelery (celery) {
+function getCelery (celery, callback) {
   request('https://api.trycelery.com/v1/orders?access_token=' + celery.token, function (error, response, body) {
     if (!error && response.statusCode == 200) {
-      console.log(body);
+      callback(null, body);
     } else {
-      console.log(error, response.statusCode);
+      callback([error, response.statusCode]);
     }
   });
 }
