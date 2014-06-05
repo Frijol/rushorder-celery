@@ -1,8 +1,7 @@
-
-/*
- * GET home page.
- */
+var secrets = require('./secrets');
 
 exports.index = function(req, res){
   res.render('index', { title: 'Express' });
 };
+
+// function
