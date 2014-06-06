@@ -12,36 +12,24 @@ exports.index = function (req, res) {
   // Get data from Celery
   getCelery(celery, function (err, celeryData) {
     var allOrders = celeryData.orders;
-    var total = celeryData.total;
-    sortByStatus(allOrders, function (orders) {
-      var paid = orders.paid;
-      var open = orders.open;
-      var failed = orders.failed;
-      var cancelled = orders.cancelled;
-      totalAll([allOrders, paid, open, failed, cancelled], function (totals) {
-        var grandTotal = totals[0];
-        var paidTotal = totals[1];
-        var openTotal = totals[2];
-        var failedTotal = totals[3];
-        var cancelledTotal = totals[4];
-        // Render the page
-        res.render('index', { title: 'Dashboard',
-          total: total,
-          numPaid: paid.length,
-          numOpen: open.length,
-          numFailed: failed.length,
-          numCancelled: cancelled.length,
-          grandTotal: grandTotal,
-          paidTotal: paidTotal,
-          openTotal: openTotal,
-          failedTotal: failedTotal,
-          cancelledTotal: cancelledTotal
+    getOrderStats(allOrders, function (stats) {
+      res.render('index', { title: 'Dashboard',
+        total: stats.total,
+        numPaid: stats.numPaid,
+        numOpen: stats.numOpen,
+        numFailed: stats.numFailed,
+        numCancelled: stats.numCancelled,
+        grandTotal: stats.grandTotal,
+        paidTotal: stats.paidTotal,
+        openTotal: stats.openTotal,
+        failedTotal: stats.failedTotal,
+        cancelledTotal: stats.cancelledTotal
       });
     });
+
     // Get data from Rush Order
     // getRushOrder(ro);
     // Graph with Plotly
-    });
   });
 };
 
@@ -53,6 +41,34 @@ function getCelery (celery, callback) {
     } else {
       callback([error, response.statusCode]);
     }
+  });
+}
+
+function getOrderStats (allOrders, callback) {
+  sortByStatus(allOrders, function (orders) {
+    var paid = orders.paid;
+    var open = orders.open;
+    var failed = orders.failed;
+    var cancelled = orders.cancelled;
+    totalAll([allOrders, paid, open, failed, cancelled], function (totals) {
+      var grandTotal = totals[0];
+      var paidTotal = totals[1];
+      var openTotal = totals[2];
+      var failedTotal = totals[3];
+      var cancelledTotal = totals[4];
+      callback({
+        total: allOrders.length,
+        numPaid: paid.length,
+        numOpen: open.length,
+        numFailed: failed.length,
+        numCancelled: cancelled.length,
+        grandTotal: grandTotal,
+        paidTotal: paidTotal,
+        openTotal: openTotal,
+        failedTotal: failedTotal,
+        cancelledTotal: cancelledTotal
+      });
+    });
   });
 }
 
