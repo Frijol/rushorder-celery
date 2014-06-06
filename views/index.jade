@@ -1,6 +1,7 @@
 extends layout
 
 block content
+
   h1= title
-  h2 Orders:
-  p #{celeryData}
+  h2 #{total} Total Orders:
+  p #{numPaid} paid, #{numOpen} open, #{numFailed} failed to charge, #{numCancelled} cancelled
