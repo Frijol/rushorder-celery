@@ -11,27 +11,40 @@ var secrets = require('../secrets.js').secrets,
 exports.index = function (req, res) {
   // Get data from Celery
   getCelery(celery, function (err, celeryData) {
-    var ordersRaw = celeryData.orders;
+    var allOrders = celeryData.orders;
     var total = celeryData.total;
-    sortByStatus(ordersRaw, function (orders) {
+    sortByStatus(allOrders, function (orders) {
       var paid = orders.paid;
       var open = orders.open;
       var failed = orders.failed;
       var cancelled = orders.cancelled;
-      res.render('index', { title: 'Dashboard',
-        total: total,
-        numPaid: paid.length,
-        numOpen: open.length,
-        numFailed: failed.length,
-        numCancelled: cancelled.length
+      totalAll([allOrders, paid, open, failed, cancelled], function (totals) {
+        var grandTotal = totals[0];
+        var paidTotal = totals[1];
+        var openTotal = totals[2];
+        var failedTotal = totals[3];
+        var cancelledTotal = totals[4];
+        // Render the page
+        res.render('index', { title: 'Dashboard',
+          total: total,
+          numPaid: paid.length,
+          numOpen: open.length,
+          numFailed: failed.length,
+          numCancelled: cancelled.length,
+          grandTotal: grandTotal,
+          paidTotal: paidTotal,
+          openTotal: openTotal,
+          failedTotal: failedTotal,
+          cancelledTotal: cancelledTotal
       });
     });
     // Get data from Rush Order
     // getRushOrder(ro);
     // Graph with Plotly
-    // Render the page
+    });
   });
 };
+
 
 function getCelery (celery, callback) {
   request('https://api.trycelery.com/v1/orders?access_token=' + celery.token, function (error, response, body) {
@@ -64,6 +77,32 @@ function sortByStatus (orders, callback) {
     // Callback
     if((paid.length + open.length + failed.length + cancelled.length) == orders.length) {
       callback({paid: paid, open: open, failed: failed, cancelled: cancelled});
+    }
+  });
+}
+
+function totalMoney (orders, callback) {
+  var total = 0;
+  var count = 0;
+  orders.forEach(function (order) {
+    total += (order.total / 100); // original is in pennies; convert to dollars
+    count ++;
+    if (count == orders.length) {
+      callback(total.toFixed(2));
+    }
+  });
+}
+
+function totalAll (orderArrays, callback) {
+  var totals = [];
+  var count = 0;
+  orderArrays.forEach(function (orderArray, index) {
+    totalMoney(orderArray, function (total) {
+      totals[index] = total;
+    });
+    count++;
+    if(count == orderArrays.length) {
+      callback(totals);
     }
   });
 }

@@ -3,5 +3,8 @@ extends layout
 block content
 
   h1= title
-  h2 #{total} Total Orders:
-  p #{numPaid} paid, #{numOpen} open, #{numFailed} failed to charge, #{numCancelled} cancelled
+  h2 #{total} Total Orders ($#{grandTotal}):
+  p #{numPaid}  ($#{paidTotal}) paid
+  p #{numOpen} ($#{openTotal}) open
+  p #{numFailed} ($#{failedTotal}) failed to charge
+  p #{numCancelled} ($#{cancelledTotal}) cancelled
