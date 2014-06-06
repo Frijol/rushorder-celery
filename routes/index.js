@@ -12,6 +12,7 @@ exports.index = function (req, res) {
   // Get data from Celery
   getCelery(celery, function (err, celeryData) {
     var allOrders = celeryData.orders;
+    getDates(allOrders);
     getOrderStats(allOrders, function (stats) {
       res.render('index', { title: 'Dashboard',
         total: stats.total,
@@ -41,6 +42,12 @@ function getCelery (celery, callback) {
     } else {
       callback([error, response.statusCode]);
     }
+  });
+}
+
+function getDates (orders) {
+  orders.forEach(function (order) {
+    console.log(order.created_date);
   });
 }
 
